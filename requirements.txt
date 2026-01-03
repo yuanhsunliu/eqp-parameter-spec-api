@@ -1,0 +1,8 @@
+flask
+flask-restful
+flask-cors
+flask-swagger-ui
+mcp
+requests
+pytest
+pytest-playwright

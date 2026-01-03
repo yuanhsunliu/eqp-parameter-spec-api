@@ -1,0 +1,203 @@
+openapi: 3.0.3
+info:
+  title: EQP Parameter Spec API
+  description: API for managing EQP parameter specifications
+  version: 1.0.0
+
+servers:
+  - url: http://127.0.0.1:5000
+    description: Local development server
+
+paths:
+  /api/parameter-specs:
+    get:
+      summary: List all parameter specs
+      description: Returns all EQP parameter specifications from the CSV file
+      operationId: listParameterSpecs
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ParameterSpec'
+              example:
+                - tool_name: "TOOL_A"
+                  parameter_name: "temperature"
+                  usl: 100.000
+                  lsl: 0.000
+                  ucl: 90.000
+                  lcl: 10.000
+                  cl: 50.000
+
+    post:
+      summary: Add a new parameter spec
+      description: Creates a new EQP parameter specification
+      operationId: addParameterSpec
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParameterSpecInput'
+            example:
+              tool_name: "TOOL_A"
+              parameter_name: "temperature"
+              usl: 100.0
+              lsl: 0.0
+              ucl: 90.0
+              lcl: 10.0
+              cl: 50.0
+      responses:
+        '201':
+          description: Parameter spec created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParameterSpec'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                missing_field:
+                  value:
+                    error: "Missing required field: tool_name"
+                empty_field:
+                  value:
+                    error: "Field cannot be empty: tool_name"
+                length_exceeded:
+                  value:
+                    error: "Field exceeds maximum length of 100: tool_name"
+                invalid_number:
+                  value:
+                    error: "Invalid number format for field: usl"
+                invalid_relationship:
+                  value:
+                    error: "Invalid value relationship: LSL < LCL < CL < UCL < USL required"
+                invalid_json:
+                  value:
+                    error: "Invalid JSON format"
+        '409':
+          description: Duplicate entry
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Parameter spec already exists for this tool_name and parameter_name"
+        '415':
+          description: Unsupported Media Type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Unsupported Media Type. Content-Type must be application/json"
+
+components:
+  schemas:
+    ParameterSpec:
+      type: object
+      properties:
+        tool_name:
+          type: string
+          description: Tool/machine name
+          example: "TOOL_A"
+        parameter_name:
+          type: string
+          description: Parameter name
+          example: "temperature"
+        usl:
+          type: number
+          format: float
+          description: Upper Specification Limit (3 decimal places)
+          example: 100.000
+        lsl:
+          type: number
+          format: float
+          description: Lower Specification Limit (3 decimal places)
+          example: 0.000
+        ucl:
+          type: number
+          format: float
+          description: Upper Control Limit (3 decimal places)
+          example: 90.000
+        lcl:
+          type: number
+          format: float
+          description: Lower Control Limit (3 decimal places)
+          example: 10.000
+        cl:
+          type: number
+          format: float
+          description: Center Line (3 decimal places)
+          example: 50.000
+      required:
+        - tool_name
+        - parameter_name
+        - usl
+        - lsl
+        - ucl
+        - lcl
+        - cl
+
+    ParameterSpecInput:
+      type: object
+      properties:
+        tool_name:
+          type: string
+          description: Tool/machine name (1-100 characters, will be trimmed)
+          maxLength: 100
+          example: "TOOL_A"
+        parameter_name:
+          type: string
+          description: Parameter name (1-100 characters, will be trimmed)
+          maxLength: 100
+          example: "temperature"
+        usl:
+          type: number
+          format: float
+          description: Upper Specification Limit
+          example: 100.0
+        lsl:
+          type: number
+          format: float
+          description: Lower Specification Limit
+          example: 0.0
+        ucl:
+          type: number
+          format: float
+          description: Upper Control Limit
+          example: 90.0
+        lcl:
+          type: number
+          format: float
+          description: Lower Control Limit
+          example: 10.0
+        cl:
+          type: number
+          format: float
+          description: Center Line
+          example: 50.0
+      required:
+        - tool_name
+        - parameter_name
+        - usl
+        - lsl
+        - ucl
+        - lcl
+        - cl
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+      required:
+        - error

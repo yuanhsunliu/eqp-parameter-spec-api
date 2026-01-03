@@ -1,0 +1,12 @@
+{
+  "servers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"]
+    },
+    "eqp-parameter-spec-api": {
+      "type": "http",
+      "url": "http://127.0.0.1:5001/mcp"
+    }
+  }
+}
